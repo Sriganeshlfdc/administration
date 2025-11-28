@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Montfort School Student Management</title>
+  {% load static %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Corrected static file reference for Django -->
+  <link rel="stylesheet" href="{% static 'styles/base.css' %}">
+  
+  <style>
+    /* Basic Styling for studentmanagement.html specific elements */
+    .form-container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .form-container h1, .form-container h3 {
+        text-align: center;
+        color: #1f2937;
+    }
+    fieldset {
+        border: 1px solid #d1d5db;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 6px;
+    }
+    legend h3 {
+        padding: 0 10px;
+        font-size: 1.15em;
+        font-weight: 600;
+        color: #4b5563;
+    }
+    .input-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 15px;
+    }
+    .field {
+        flex: 1 1 45%; /* Default to two columns */
+        min-width: 250px;
+    }
+    .field.full-width {
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #374151;
+        font-size: 0.95em;
+    }
+    .required::after {
+        content: ' *';
+        color: #ef4444;
+        font-weight: bold;
+    }
+    input[type="text"], input[type="date"], input[type="number"], select, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 1em;
+        color: #1f2937;
+    }
+    textarea {
+        resize: vertical;
+    }
+    .button-wrapper {
+        text-align: center;
+        margin-top: 30px;
+    }
+    .btn-primary {
+        background-color: #10b981;
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 6px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .btn-primary:hover {
+        background-color: #059669;
+    }
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .data-table th, .data-table td {
+        border: 1px solid #e5e7eb;
+        padding: 12px 15px;
+        text-align: left;
+    }
+    .data-table th {
+        background-color: #f3f4f6;
+        color: #374151;
+        font-weight: 600;
+    }
+    .data-table tr:nth-child(even) {
+        background-color: #f9fafb;
+    }
+    .data-table tr:hover {
+        background-color: #eff6ff;
+    }
+    
+    /* Modal Styling for Success/Error */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none; /* Hidden by default */
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        max-width: 400px;
+        width: 90%;
+        position: relative;
+    }
+    .modal-icon {
+        font-size: 3em;
+        color: #10b981;
+        margin-bottom: 10px;
+    }
+    .modal-content h4 {
+        color: #10b981;
+        margin-top: 0;
+    }
+    .modal-close-btn {
+        margin-top: 20px;
+        background-color: #3b82f6;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    /* Error Message Styling */
+    .error-box {
+        background-color: #fee2e2;
+        color: #ef4444;
+        border: 1px solid #fecaca;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+  </style>
+</head>
+<body class="layout-wrapper light-theme">
+  <div class="navbar">
+    <div class="left">
+      <button id="menu-toggle" aria-label="Toggle menu"><i class="fa fa-bars"></i></button>
+      <button id="profile" aria-label="User profile"><i class="fa fa-user"></i></button>
+    </div>
+    <div class="middle">
+      <a href="{% url 'home' %}"><h1>Montfort School</h1></a>
+    </div>
+    <div class="right">
+      <button id="fullscreen-btn" aria-label="Toggle fullscreen" class="navbar-btn"><i class="fa fa-expand"></i></button>
+      <button id="settings-btn" aria-label="Toggle settings" class="navbar-btn"><i class="fa fa-cog"></i></button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="sidebar" id="sidebar">
+      <ul>
+        <li>
+          <a href="{% url 'home' %}"><button  class="main-item" data-menu="dashboard">
+            <i class="fa fa-home"></i>
+            <span>Dashboard</span></button>
+          </a>
+        </li>
+        <li>
+          <button class="main-item" data-menu="student">
+            <i class="fa fa-users"></i>
+            <span>Student Management</span>
+          </button>
+          <ul class="sub-menu">
+            <li><a href="{% url 'student_management' %}#admission" id="addstudent">Add Student</a></li>
+            <li><a href="{% url 'student_management' %}#list" id="viewstudent">View Students</a></li>
+            <li><a href="{% url 'student_management' %}#summary" id="summary">Students Summary</a></li>
+            <li><a href="{% url 'student_management' %}#migate" id="migrate">Migrate</a></li>
+            <li><a href="{% url 'student_management' %}#quickedit" id="quickedit">Quick Edit</a></li>
+            <li><a href="{% url 'student_management' %}#acaemicedit" id="academicedit">Academic Edit</a></li>
+            <li><a href="{% url 'student_management' %}#searchstudent" id="searchstudent">Search Student</a></li>
+            <li><a href="{% url 'student_management' %}#studentaccounts" id="studentaccounts">Stuent Accounts</a></li>
+            <li><a href="{% url 'student_management' %}#oldstudentdebt" id="oldstudentdebt">Old Students Debts</a></li>
+            <li><a href="{% url 'student_management' %}#oldstudentrec" id="oldstudentrec">Old Student Receipts</a></li>
+          </ul>
+        </li>
+        <!-- The rest of the sidebar is truncated for brevity but would be included in the full file -->
+        <li>
+          <button class="main-item" data-menu="fees">
+            <i class="fa fa-money-check"></i>
+            <span>Fee Management</span>
+          </button>
+          <ul class="sub-menu">
+            <li><a href="#" id="feescate">Fees Categories</a></li>
+            <li><a href="#" id="payfees">Pay Fees</a></li>
+            <li><a href="#" id="feesbreakdown">Fees Break Downs</a></li>
+            <li><a href="#" id="viewpayments">View Fees Payments</a></li>
+            <li><a href="#" id="onlinepayments">View Online Payments</a></li>
+            <li><a href="#" id="pendingonlinepayments">Pending Online Payments</a></li>
+            <li><a href="#" id="searchreceipt">Search Receipt</a></li>
+            <li><a href="#" id="feestructure">Fee Structure</a></li>
+            <li><a href="#" id="prev-bal">Previous Balances</a></li>
+            <li><a href="#" id="fees-add">Fees Additions</a></li>
+            <li><a href="#" id="fees-ded">Fees Deductions</a></li>
+            <li><a href="#" id="bursary-cat">Bursary Categories</a></li>
+            <li><a href="#" id="fees-burs">Fees Bursaries</a></li>
+            <li><a href="#" id="feesreceipt">Fees Receipts</a></li>
+            <li><a href="#" id="demandnotes">Fees Demand Notes</a></li>
+          </ul>
+        </li>
+        <li>
+          <button class="main-item" data-menu="expenses">
+            <i class="fa fa-coins"></i>
+            <span>Manage Expenses</span>
+          </button>
+          <ul class="sub-menu">
+            <li><a href="#" id="newrequi">New Requisition</a></li>
+            <li><a href="#" id="viewrequi">View Requisitions</a></li>
+            <li><a href="#" id="expensecate">Expense Categories</a></li>
+            <li><a href="#" id="recordexpense">Record Expense</a></li>
+            <li><a href="#" id="viewexpense">View Expenses</a></li>
+            <li><a href="#" id="viewcreditors">View Creditors</a></li>
+            <li><a href="#" id="viewsuppliers">View Suppliers</a></li>
+          </ul>
+        </li>
+        <li>
+          <button class="main-item" data-menu="revenue">
+            <i class="fa fa-donate"></i>
+            <span>Manage Revenues</span>
+          </button>
+          <ul class="sub-menu">
+            <li><a href="#" id="revenuecale">Revenue Categories</a></li>
+            <li><a href="#" id="revenuesour">Revenue Sources</a></li>
+            <li><a href="#" id="viewrevenue">View Revenues</a></li>
+          </ul>
+        </li>
+        <li>
+          <button class="main-item" data-menu="OLevel">
+            <i class="fa fa-book"></i>
+            <span>O Level</span>
+          </button>
+          <ul class="sub-menu">
+            <li><a href="#" id="addexammarks">Add Exam Marks</a></li>
+            <li><a href="#" id="addstaffmarks">Add Staff Marks</a></li>
+            <li><a href="#" id="AOIreportcard">AOI Report Cards</a></li>
+            <li><a href="#" id="EOTreportcard">EOT Report Cards</a></li>
+            <li><a href="#" id="reportcard">Report Cards (100%)</a></li>
+            <li><a href="#" id="CBCreportcard">CBC Report Cards</a></li>
+            <li><a href="#" id="viewmarks">View Marks (/100)</a></li>
+            <li><a href="#" id="VDreportcard">VD Report Cards</a></li>
+            <li><a href="#" id="subjectmarksheets">Subject Mark Sheets</a></li>
+            <li><a href="#" id="classmissingmarks">Class Missing Marks</a></li>
+            <li><a href="#" id="setmissingmarks">Set Missing Marks</a></li>
+            <li><a href="#" id="subjectanalysisgrade">Subject Analysis By Grade</a></li>
+            <li><a href="#" id="subjectanalysisIDF">Subject Analysis By IDF</a></li>
+            <li><a href="#" id="competences">Manage Competences</a></li>
+            <li><a href="#" id="consideredsets">Considered Sets</a></li>
+            <li><a href="#" id="optionalsubjects">Optional Subjects</a></li>
+            <li><a href="#" id="addexammarksnew">Add Exam Marks New</a></li>
+            <li><a href="#" id="sttudentcomments">Student Comments</a></li>
+            <li><a href="#" id="projectevaluation">Projects Evaluation</a></li>
+            <li><a href="#" id="NCDCreportcard">NCDC Report Card</a></li>
+            <li><a href="#" id="reportcomments">Report Comments</a></li>
+          </ul>
+        </li>
+        <li>
+          <button class="main-item" data-menu="staff">
+            <i class="fa fa-user-tie"></i>
+            <span>Staff Management</span>
+          </button>
+          <ul class="sub-menu">
+            <li><a href="#" id="staffposition">Staff Position</a></li>
+            <li><a href="#" id="viewstaff">View Staff</a></li>
+            <li><a href="#" id="staffadvances">Staff Advances</a></li>
+            <li><a href="#" id="deductions">Deductions</a></li>
+            <li><a href="#" id="staffpayments">Staff Payments</a></li>
+            <li><a href="#" id="salaryledger">Salary Ledger</a></li>
+            <li><a href="#" id="staffsubjects">Staff Subjects</a></li>
+          </ul>
+        </li>
+        <li>
+          <button class="main-item" data-menu="notification">
+            <i class="fa fa-bell"></i>
+            <span></i>Notification Center</span></button>
+          <ul class="sub-menu">
+            <li><a href="#" id="sms">SMS Notifications</a></li>
+            <li><a href="#" id="email">Email Notifications</a></li>
+          </ul>
+        </li>
+        <li>
+          <button class="main-item" data-menu="assets">
+            <i class="fa fa-address-card"></i>
+            <span>Manage Assets</span>
+          </button>
+          <ul class="sub-menu">
+            <li><a href="#" id="assetcate">Asset Categories</a></li>
+            <li><a href="#" id="assetlocation">Asset Locations</a></li>
+            <li><a href="#" id="viewasset">View Asset</a></li>
+            <li><a href="#" id="assetspurchases">Assets Purchases</a></li>
+            <li><a href="#" id="assetregister">Asset Register</a></li>
+          </ul>
+        </li>
+        <li>
+          <button class="main-item" data-menu="vistors">
+            <i class="fa fa-address-card"></i>
+            <span>Vistors Book</span>
+          </button>
+          <ul class="sub-menu">
+            <li><a href="#" id="viewvisitors">View Visitors</a></li>
+            <li><a href="#" id="visitorsreport">Visitors Report</a></li>
+          </ul>
+        </li>
+        <li>
+          <button class="main-item" data-menu="attendance">
+            <i class="fa fa-address-card"></i>
+            <span>Manage Attendance</span>
+          </button>
+          <ul class="sub-menu">
+            <li><a href="#" id="studentatte">Student Attendance</a></li>
+            <li><a href="#" id="staffatte">Staff Attendance</a></li>
+            <li><a href="#" id="studentsummaries">Students Summaries</a></li>
+            <li><a href="#" id="staffsummaries">Staff Summaries</a></li>
+          </ul>
+        </li>
+        <li>
+          <button class="main-item" data-menu="events">
+            <i class="fa fa-calendar-alt"></i>
+            <span>Events</span>
+          </button>
+          <ul class="sub-menu">
+            <li><a href="#" id="upcomingevents">Upcoming Events</a></li>
+            <li><a href="#" id="eventreport">Events Report</a></li>
+          </ul>
+        </li>
+        <li>
+          <button class="main-item" data-menu="logout">
+            <i class="fa fa-power-off"></i>
+            <span>Log Out</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="content" id="content">
+    
+    <!-- Student Admission Module (Visible by default) -->
+    <div id="admission-module" class="module">
+        <div class="form-container">
+            <h1>Student Admission Application Form</h1>
+            
+            {% if error_message %}
+                <div class="error-box">
+                    <strong>Error:</strong> {{ error_message }}
+                </div>
+            {% endif %}
+
+            <!-- Form Action updated to use Django's URL tag and includes CSRF protection -->
+            <form action="{% url 'student_management' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <fieldset>
+                  <legend><h3>I. Personal Information</h3></legend>
+                <div class="input-group">
+                    <div class="field full-width">
+                        <label for="name" class="required">Full Legal Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="field">
+                        <label for="dob">Date Of Birth</label>
+                        <input type="date" id="dob" name="dob">
+                    </div>
+                    <div class="field">
+                        <label for="gender" class="required">Gender</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="field full-width">
+                        <label for="address">Student Address (Where the student comes from)</label>
+                        <textarea id="address" name="address" rows="3"></textarea>
+                    </div>
+                </div>
+                </fieldset>
+
+               <fieldset>
+                 <legend><h3>II. Parent/Guardian Information</h3></legend>
+                <div class="input-group">
+                    <div class="field full-width">
+                        <label for="parent_name" class="required">Parent/Guardian Name</label>
+                        <input type="text" id="parent_name" name="parent_name" required>
+                    </div>
+                    <div class="field">
+                        <label for="contact_1">Parent/Guardian Contact 1 (Primary)</label>
+                        <input type="text" id="contact_1" name="contact_1" placeholder="e.g., +XXX-XXXXXX">
+                    </div>
+                    <div class="field">
+                        <label for="contact_2">Parent/Guardian Contact 2 (Secondary)</label>
+                        <input type="text" id="contact_2" name="contact_2" placeholder="e.g., +XXX-XXXXXX">
+                    </div>
+                </div>
+               </fieldset>
+
+                <fieldset>
+                  <legend><h3>III. Academic Records (Previous School)</h3></legend>
+                <div class="input-group">
+                    <div class="field">
+                        <label for="former_school">Former School</label>
+                        <input type="text" id="former_school" name="former_school">
+                    </div>
+                    <div class="field">
+                        <label for="ple_index">PLE Index Number</label>
+                        <input type="text" id="ple_index" name="ple_index">
+                    </div>
+                    <div class="field">
+                        <label for="ple_agg">PLE Aggregate (Agg)</label>
+                        <input type="number" id="ple_agg" name="ple_agg" min="4" max="36" placeholder="e.g., 8">
+                    </div>
+                    <div class="field">
+                        <label for="uce_index">UCE Index Number</label>
+                        <input type="text" id="uce_index" name="uce_index">
+                    </div>
+                    <div class="field full-width">
+                        <label for="uce_result">UCE Result (Detailed Grades/Scores)</label>
+                        <textarea id="uce_result" name="uce_result" rows="2" placeholder="e.g., English: C4, Math: D2, Science: C6"></textarea>
+                    </div>
+                </div>
+                </fieldset>
+
+                <fieldset>
+                <legend><h3>IV. Enrollment Details and Status</h3></legend>
+                <div class="input-group">
+                    <div class="field">
+                        <label for="admission_year" class="required">Admission Year</label>
+                        <input type="text" id="admission_year" name="admission_year" value="{{ current_year }}" required>
+                    </div>
+                    <div class="field">
+                        <label for="registration_year">Registration Year</label>
+                        <select id="registration_year" name="registration_year">
+                            <option value="{{ current_year }}">{{ current_year }}</option>
+                            <option value="{{ current_year|add:-1 }}">{{ current_year|add:-1 }}</option>
+                            <option value="{{ current_year|add:-2 }}">{{ current_year|add:-2 }}</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="term" class="required">Term</label>
+                        <select id="term" name="term" required>
+                            <option value="">Select Term</option>
+                            <option value="Term 1">Term 1</option>
+                            <option value="Term 2">Term 2</option>
+                            <option value="Term 3">Term 3</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="residence" class="required">Residence</label>
+                        <select id="residence" name="residence" required>
+                            <option value="">Select Residence</option>
+                            <option value="Day">Day</option>
+                            <option value="Boarding">Boarding</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="entry_status" class="required">Entry Status</label>
+                        <select id="entry_status" name="entry_status" required>
+                            <option value="">Select Entry</option>
+                            <option value="Continuing">Continuing</option>
+                            <option value="New">New</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="class" class="required">Class</label>
+                        <select id="class" name="class" required>
+                            <option value="">Select Class</option>
+                            <option value="S.1">S.1</option>
+                            <option value="S.2">S.2</option>
+                            <option value="S.3">S.3</option>
+                            <option value="S.4">S.4</option>
+                            <option value="S.5">S.5</option>
+                            <option value="S.6">S.6</option>
+                            </select>
+                    </div>
+                    <div class="field full-width">
+                        <label for="stream">Stream (Applicable for A-Level/Advanced Classes)</label>
+                        <select id="stream" name="stream">
+                            <option value="">Select Stream</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                            <option value="E">E</option>
+                            <option value="G">G</option>
+                            <option value="H">H</option>
+                            <option value="I">I</option>
+                            <option value="West">West</option>
+                        </select>
+                    </div>
+                </div>
+                </fieldset>
+
+                <fieldset>
+                <legend><h3>V. Additional Information & Requirements</h3></legend>
+                <div class="input-group">
+                    <div class="field half-width">
+                        <label for="more_info">More Information (Any relevant notes/disabilities)</label>
+                        <textarea id="more_info" name="more_info" rows="3"></textarea>
+                    </div>
+                    <div class="field half-width">
+                        <label for="photo">Student Photo</label>
+                        <div class="photo-upload">
+                            <input type="file" id="photo" name="photo" accept="image/*">
+                            <p style="margin: 5px 0 0; font-size: 0.8em; color: #555;">(Max 2MB, Passport Size)</p>
+                        </div>
+                    </div>
+                </div>
+                </fieldset>
+                
+               <div class="button-wrapper">
+                  <button type="submit" class="btn-primary">Submit Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- View Students Module (Added functionality) -->
+    <div id="list-module" class="module" style="display:none;">
+        <h1>View All Students</h1>
+        <p class="subtitle">A list of all recently admitted students.</p>
+        
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Class/Stream</th>
+                    <th>Gender</th>
+                    <th>Parent/Guardian</th>
+                    <th>Admission Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in all_students %}
+                <tr>
+                    <td>{{ student.student_id }}</td>
+                    <td>{{ student.full_name }}</td>
+                    <td>{{ student.current_class }} {% if student.stream %}({{ student.stream }}){% endif %}</td>
+                    <td>{{ student.gender }}</td>
+                    <td>{{ student.parent_name }}</td>
+                    <td>{{ student.date_added|date:"Y-m-d" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center;">No student records found in the database.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+    <div class="settings-panel" id="settings-panel">
+      <!-- Settings Panel Content (kept as is) -->
+      <div class="settings-header">
+        <h3>Settings</h3>
+        <button id="settings-close-btn" class="close-btn" aria-label="close settings">&times;</button>
+      </div>
+      <div class="settings-item theme-toggle">
+        <strong>Theme</strong>
+        <button id="theme-toggle-btn" class="btn btn-secondary"><p>Switch to Dark</p></button>
+      </div>
+      <div class="settings-item">
+        <strong>Language</strong>
+        <span>English</span>
+      </div>
+        <div class="settings-item">
+      <strong>Notifications</strong>
+        <span>Enabled</span>
+      </div>
+    </div>
+
+    <!-- Submission Modal Logic -->
+    <div class="modal-backdrop" id="submission-modal" 
+         style="display: {% if student_id %}flex{% else %}none{% endif %};">
+        <div class="modal-content">
+            <i class="fa fa-check-circle modal-icon"></i>
+            <h4>Application Successful!</h4>
+            <p>The student record (ID: <strong id="student-id-display">{{ student_id|default:"N/A" }}</strong>) has been successfully saved to the database.</p>
+            <button id="modal-close-btn" class="modal-close-btn">Close and Continue</button>
+        </div>
+    </div>
+
+  <!-- Corrected static file reference for Django -->
+  <script src="{% static 'scripts/base.js' %}"></script>
+  <script src="{% static 'scripts/student.js' %}"></script>
+  
+  <script>
+    // JavaScript to handle the success modal and navigation tabs (which were in student.js)
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('submission-modal');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const contentDiv = document.getElementById('content');
+        
+        // Modal logic
+        if (modal) {
+            modalCloseBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+                // You might want to clear the form or redirect here
+            });
+        }
+        
+        // Sidebar navigation logic (mimicking the original behavior)
+        const sidebar = document.getElementById('sidebar');
+        const admissionModule = document.getElementById('admission-module');
+        const listModule = document.getElementById('list-module');
+
+        // Function to show/hide modules based on hash
+        function showModuleBasedOnHash() {
+            const hash = window.location.hash.substring(1); // Get the hash without '#'
+
+            // Hide all potential modules
+            admissionModule.style.display = 'none';
+            listModule.style.display = 'none';
+            
+            // Show the relevant module
+            if (hash === 'list') {
+                listModule.style.display = 'block';
+            } else if (hash === 'admission' || !hash) {
+                // Default to admission if hash is empty or explicitly admission
+                admissionModule.style.display = 'block';
+            }
+            // Add other modules (summary, migrate, etc.) here later
+        }
+
+        // Initial load check
+        showModuleBasedOnHash();
+
+        // Listen for hash changes
+        window.addEventListener('hashchange', showModuleBasedOnHash);
+
+        // Optional: Re-wire sidebar clicks to update hash
+        sidebar.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                // If it's a student management link, let the hash change handle it
+                if (e.target.closest('ul.sub-menu') && e.target.getAttribute('href').includes('student_management')) {
+                    // Normal link behavior handles the hash change
+                }
+            });
+        });
+        
+    });
+  </script>
+</body>
+</html>
